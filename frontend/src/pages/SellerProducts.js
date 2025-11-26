@@ -1,8 +1,11 @@
+// src/components/SellerProducts.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-common.css";
 import "../styles/SellerProducts.css";
+
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 function SellerProducts() {
   const [products, setProducts] = useState([]);
@@ -11,11 +14,11 @@ function SellerProducts() {
     name: "",
     price: "",
     description: "",
-    stock: "",      
-    brand: "",      
+    stock: "",
+    brand: "",
     categoryId: "",
   });
-
+  const [selectedFile, setSelectedFile] = useState(null); // NEW
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
@@ -26,10 +29,10 @@ function SellerProducts() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/v1/seller/products", {
+      const res = await axios.get(`${BASE_URL}/api/v1/seller/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(res.data);
+      setProducts(res.data || []);
     } catch (err) {
       console.error("Error fetching products:", err);
     }
@@ -37,10 +40,10 @@ function SellerProducts() {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/v1/seller/all", {
+      const res = await axios.get(`${BASE_URL}/api/v1/seller/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setCategories(res.data);
+      setCategories(res.data || []);
     } catch (err) {
       console.error("Error fetching categories:", err);
     }
@@ -54,19 +57,44 @@ function SellerProducts() {
     }
 
     try {
-      
       const payload = {
         ...form,
         price: parseFloat(form.price),
-        stock: parseInt(form.stock),
+        stock: parseInt(form.stock || "0"),
         categoryId: parseInt(form.categoryId),
       };
 
-      await axios.post("http://localhost:8080/api/v1/seller/products", payload, {
+      // 1) create product (JSON)
+      const res = await axios.post(`${BASE_URL}/api/v1/seller/products`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      const createdProduct = res.data;
+      // 2) if file selected, upload image to /seller/products/{id}/image
+      if (selectedFile && createdProduct && createdProduct.id) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        try {
+          await axios.post(
+            `${BASE_URL}/api/v1/seller/products/${createdProduct.id}/image`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+        } catch (imgErr) {
+          console.error("Image upload failed:", imgErr);
+          // non-fatal — product created, image failed
+          alert("Product created but image upload failed.");
+        }
+      }
+
       alert("Product added successfully!");
+      // reset
       setForm({
         name: "",
         price: "",
@@ -75,6 +103,7 @@ function SellerProducts() {
         brand: "",
         categoryId: "",
       });
+      setSelectedFile(null);
       fetchProducts();
     } catch (err) {
       console.error("Error adding product:", err);
@@ -84,7 +113,7 @@ function SellerProducts() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/v1/seller/products/${id}`, {
+      await axios.delete(`${BASE_URL}/api/v1/seller/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchProducts();
@@ -93,11 +122,18 @@ function SellerProducts() {
     }
   };
 
+  // helper to get full image URL (backend serves /uploads/**)
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith("http")) return imageUrl;
+    return `${BASE_URL}${imageUrl}`;
+  };
+
   return (
     <div className="page-container">
       <h2 className="page-title">Manage Products</h2>
 
-      <form onSubmit={handleAddProduct} className="product-form">
+      <form onSubmit={handleAddProduct} className="product-form" encType="multipart/form-data">
         <input
           type="text"
           placeholder="Product Name"
@@ -121,7 +157,6 @@ function SellerProducts() {
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
 
-        
         <input
           type="text"
           placeholder="Brand"
@@ -130,7 +165,6 @@ function SellerProducts() {
           required
         />
 
-        
         <input
           type="number"
           placeholder="Stock Quantity"
@@ -139,7 +173,6 @@ function SellerProducts() {
           required
         />
 
-       
         <select
           value={form.categoryId}
           onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
@@ -153,6 +186,16 @@ function SellerProducts() {
           ))}
         </select>
 
+        {/* NEW: file input */}
+        <label className="file-label">
+          Product Photo (optional)
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+          />
+        </label>
+
         <button type="submit" className="btn btn-success">
           Add Product
         </button>
@@ -162,27 +205,45 @@ function SellerProducts() {
       <ul className="product-list">
         {products.map((p) => (
           <li key={p.id} className="product-item">
-            <div>
-              <strong>{p.name}</strong> — ₹{p.price}
-              <br />
-              <small>{p.description}</small>
-              <div> Stock: {p.stock}</div> 
-              <div> Brand: {p.brand}</div> 
-              {p.category && (
-                <div className="product-category">
-                  <em>Category: {p.category.name}</em>
-                </div>
-              )}
+            <div style={{ display: "flex", gap: 12 }}>
+              <div>
+                {p.imageUrl ? (
+                  <img
+                    src={getImageUrl(p.imageUrl)}
+                    alt={p.name}
+                    style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 6 }}
+                  />
+                ) : (
+                  <div style={{ width: 120, height: 90, background: "#eee", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:6 }}>
+                    No Image
+                  </div>
+                )}
+              </div>
+              <div>
+                <strong>{p.name}</strong> — ₹{p.price}
+                <br />
+                <small>{p.description}</small>
+                <div> Stock: {p.stock}</div>
+                <div> Brand: {p.brand}</div>
+                {p.category && (
+                  <div className="product-category">
+                    <em>Category: {p.category.name}</em>
+                  </div>
+                )}
+              </div>
             </div>
-            <button className="btn btn-danger" onClick={() => handleDelete(p.id)}>
-              Delete
-            </button>
+
+            <div style={{ marginLeft: "auto" }}>
+              <button className="btn btn-danger" onClick={() => handleDelete(p.id)}>
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
 
       <button onClick={() => navigate("/seller/home")} className="btn btn-gray back-btn">
-       Back to Home
+        Back to Home
       </button>
     </div>
   );

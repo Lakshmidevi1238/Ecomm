@@ -32,7 +32,10 @@ public class Product {
     @JoinColumn(name = "seller_id")
     private User seller;
 
-   
+    // NEW: image URL for product photo
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "active", nullable = false)
     private boolean active = true;
 
@@ -69,6 +72,9 @@ public class Product {
 
     public User getSeller() { return seller; }
     public void setSeller(User seller) { this.seller = seller; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }

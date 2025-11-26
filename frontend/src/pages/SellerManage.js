@@ -1,8 +1,11 @@
+// src/components/SellerManage.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-common.css";
 import "../styles/SellerManage.css";
+
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 function SellerManage() {
   const [products, setProducts] = useState([]);
@@ -14,6 +17,7 @@ function SellerManage() {
     stock: "",
     brand: "",
   });
+  const [fileMap, setFileMap] = useState({}); // productId -> File
 
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
@@ -24,10 +28,10 @@ function SellerManage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/v1/seller/products", {
+      const res = await axios.get(`${BASE_URL}/api/v1/seller/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setProducts(res.data);
+      setProducts(res.data || []);
     } catch (err) {
       console.error("Error fetching products:", err);
     }
@@ -48,7 +52,7 @@ function SellerManage() {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:8080/api/v1/seller/products/${editingId}`,
+        `${BASE_URL}/api/v1/seller/products/${editingId}`,
         {
           ...editForm,
           price: parseFloat(editForm.price),
@@ -68,7 +72,7 @@ function SellerManage() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      await axios.delete(`http://localhost:8080/api/v1/seller/products/${id}`, {
+      await axios.delete(`${BASE_URL}/api/v1/seller/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Product deleted successfully!");
@@ -79,12 +83,52 @@ function SellerManage() {
     }
   };
 
+ // Replace existing handleUploadImage with this
+const handleUploadImage = async (productId) => {
+  const file = fileMap[productId];
+  if (!file) {
+    alert("Please choose a file first.");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    // IMPORTANT: do NOT set 'Content-Type' header; axios sets boundary automatically
+    await axios.post(`${BASE_URL}/api/v1/seller/products/${productId}/image`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Do not add "Content-Type" here
+      },
+    });
+    alert("Image uploaded!");
+    setFileMap((m) => {
+      const copy = { ...m };
+      delete copy[productId];
+      return copy;
+    });
+    fetchProducts();
+  } catch (err) {
+    console.error("Upload failed:", err);
+    // show server response body if available for easier debugging
+    const serverMessage = err?.response?.data || err?.message || "Unknown error";
+    alert("Image upload failed: " + JSON.stringify(serverMessage));
+  }
+};
+
+
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith("http")) return imageUrl;
+    return `${BASE_URL}${imageUrl}`;
+  };
+
   return (
     <div className="page-container">
       <h2 className="page-title">Manage Your Products</h2>
 
       <button onClick={() => navigate("/seller/home")} className="btn btn-gray back-btn">
-         Back to Home
+        Back to Home
       </button>
 
       {products.length === 0 ? (
@@ -94,6 +138,7 @@ function SellerManage() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Photo</th>
               <th>Name</th>
               <th>Price</th>
               <th>Stock</th>
@@ -107,6 +152,18 @@ function SellerManage() {
               editingId === p.id ? (
                 <tr key={p.id}>
                   <td>{p.id}</td>
+                  <td>
+                    {/* Optionally show current image while editing */}
+                    {p.imageUrl ? (
+                      <img
+                        src={getImageUrl(p.imageUrl)}
+                        alt="prod"
+                        style={{ width: 80, height: 60, objectFit: "cover" }}
+                      />
+                    ) : (
+                      <div style={{ width: 80, height: 60, background: "#eee" }} />
+                    )}
+                  </td>
                   <td>
                     <input
                       value={editForm.name}
@@ -136,19 +193,14 @@ function SellerManage() {
                   <td>
                     <input
                       value={editForm.description}
-                      onChange={(e) =>
-                        setEditForm({ ...editForm, description: e.target.value })
-                      }
+                      onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     />
                   </td>
                   <td>
                     <button className="btn btn-success" onClick={handleUpdate}>
                       Save
                     </button>
-                    <button
-                      className="btn btn-gray"
-                      onClick={() => setEditingId(null)}
-                    >
+                    <button className="btn btn-gray" onClick={() => setEditingId(null)}>
                       Cancel
                     </button>
                   </td>
@@ -156,22 +208,43 @@ function SellerManage() {
               ) : (
                 <tr key={p.id}>
                   <td>{p.id}</td>
+                  <td>
+                    {p.imageUrl ? (
+                      <img
+                        src={getImageUrl(p.imageUrl)}
+                        alt={p.name}
+                        style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 6 }}
+                      />
+                    ) : (
+                      <div style={{ width: 80, height: 60, background: "#f0f0f0" }} />
+                    )}
+                    <div style={{ marginTop: 6 }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          setFileMap((m) => ({ ...m, [p.id]: e.target.files?.[0] || null }))
+                        }
+                      />
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => handleUploadImage(p.id)}
+                        style={{ marginTop: 4 }}
+                      >
+                        Upload Image
+                      </button>
+                    </div>
+                  </td>
                   <td>{p.name}</td>
                   <td>₹{p.price}</td>
                   <td>{p.stock}</td>
                   <td>{p.brand}</td>
                   <td>{p.description}</td>
                   <td>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => handleEditClick(p)}
-                    >
+                    <button className="btn btn-primary" onClick={() => handleEditClick(p)}>
                       Edit
                     </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(p.id)}
-                    >
+                    <button className="btn btn-danger" onClick={() => handleDelete(p.id)}>
                       Delete
                     </button>
                   </td>
