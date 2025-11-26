@@ -62,7 +62,8 @@ public class SecurityConfig {
                     "/swagger-resources/**",
                     "/webjars/**",
                     "/ping",
-                    "/error"
+                    "/error",
+                    "/uploads/**"
                 ).permitAll()
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/seller/**").hasAnyRole("SELLER", "ADMIN")

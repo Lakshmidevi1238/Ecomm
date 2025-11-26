@@ -14,11 +14,14 @@ public class ProductDto {
     private Long sellerId;
     private String sellerName;
 
+    // NEW: imageUrl to return to frontend
+    private String imageUrl;
+
     public ProductDto() {}
 
     public ProductDto(Long id, String name, String description, BigDecimal price, Integer stock,
                       String brand, Long categoryId, String categoryName,
-                      Long sellerId, String sellerName) {
+                      Long sellerId, String sellerName, String imageUrl) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -29,6 +32,7 @@ public class ProductDto {
         this.categoryName = categoryName;
         this.sellerId = sellerId;
         this.sellerName = sellerName;
+        this.imageUrl = imageUrl;
     }
 
     public Long getId() { return id; }
@@ -60,5 +64,7 @@ public class ProductDto {
 
     public String getSellerName() { return sellerName; }
     public void setSellerName(String sellerName) { this.sellerName = sellerName; }
-}
 
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+}

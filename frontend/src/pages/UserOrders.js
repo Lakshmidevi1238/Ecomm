@@ -3,6 +3,13 @@ import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import "../styles/user-orders.css";
 
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
+function getImageUrl(imageUrl) {
+  if (!imageUrl) return null;
+  return imageUrl.startsWith("http") ? imageUrl : `${BASE_URL}${imageUrl}`;
+}
+
 function UserOrders() {
   const [orders, setOrders] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -67,7 +74,7 @@ function UserOrders() {
           <div key={order.orderId} className="order-card">
             <div className="order-header">
               <strong>Order #{order.orderId}</strong>
-             
+
               {order.paymentMethod?.toUpperCase() === "COD" &&
               order.items.every((i) => i.status === "DELIVERED") ? (
                 <span className="payment-badge paid">PAID</span>
@@ -108,14 +115,19 @@ function UserOrders() {
                   const currentIndex = getStatusIndex(item.status);
                   const payment = getPaymentBadge(order.paymentMethod, item.status);
 
+                  // try possible fields for image on order item
+                  const imageSrc =
+                    getImageUrl(item.imageUrl || item.productImage || item.productImageUrl || item.product?.imageUrl);
+
                   return (
                     <li key={item.productId} className="status-item">
-                      <div className="status-line">
+                      <div className="status-line" style={{ alignItems: "center", gap: 12 }}>
+                        {imageSrc && (
+                          <img src={imageSrc} alt={item.productName} style={{ width: 64, height: 48, objectFit: "cover", borderRadius: 6 }} />
+                        )}
                         <div className="status-left">
                           <b>{item.productName}</b>
-                          <span
-                            className={`item-status ${item.status?.toLowerCase()}`}
-                          >
+                          <span className={`item-status ${item.status?.toLowerCase()}`}>
                             {item.status}
                           </span>
                         </div>
@@ -134,24 +146,15 @@ function UserOrders() {
                         {steps.map((step, index) => (
                           <div key={step} className="progress-step">
                             <div
-                              className={`circle ${
-                                index <= currentIndex ? "active" : ""
-                              } ${
-                                item.status?.toLowerCase() === "delivered" &&
-                                index === 3
-                                  ? "delivered"
-                                  : ""
+                              className={`circle ${index <= currentIndex ? "active" : ""} ${
+                                item.status?.toLowerCase() === "delivered" && index === 3 ? "delivered" : ""
                               }`}
                             >
                               {index + 1}
                             </div>
                             <p className="step-label">{step}</p>
                             {index < steps.length - 1 && (
-                              <div
-                                className={`line ${
-                                  index < currentIndex ? "active" : ""
-                                }`}
-                              ></div>
+                              <div className={`line ${index < currentIndex ? "active" : ""}`}></div>
                             )}
                           </div>
                         ))}
@@ -186,5 +189,3 @@ function UserOrders() {
 }
 
 export default UserOrders;
-
-

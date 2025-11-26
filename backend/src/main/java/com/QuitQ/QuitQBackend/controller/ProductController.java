@@ -13,6 +13,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -74,20 +75,33 @@ public class ProductController {
         Product saved = productService.create(p);
         return ResponseEntity.status(201).body(toDto(saved));
     }
+
+    // NEW: upload image for a seller product
+    @PostMapping("/seller/products/{id}/image")
+    public ResponseEntity<?> uploadProductImage(@PathVariable("id") Long id,
+                                                @RequestParam("file") MultipartFile file,
+                                                Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return ResponseEntity.status(401).body("Unauthorized");
+        User seller = userService.findByEmail(auth.getName()).orElseThrow(() -> new RuntimeException("User not found"));
+        try {
+            ProductDto dto = productService.uploadProductImage(id, file, seller);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException | java.io.IOException ex) {
+            return ResponseEntity.status(400).body(Map.of("message", ex.getMessage()));
+        }
+    }
+
     @GetMapping("/seller/products")
     public ResponseEntity<?> listSellerProducts(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        
         User seller = userService.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-
         List<Product> products = productRepository.findBySeller(seller);
 
-        
         List<ProductDto> dtos = products.stream()
                 .map(this::toDto)
                 .toList();
@@ -157,6 +171,7 @@ public class ProductController {
         dto.setBrand(p.getBrand());
         if (p.getCategory() != null) { dto.setCategoryId(p.getCategory().getId()); dto.setCategoryName(p.getCategory().getName()); }
         if (p.getSeller() != null) { dto.setSellerId(p.getSeller().getId()); dto.setSellerName(p.getSeller().getName()); }
+        dto.setImageUrl(p.getImageUrl()); // <-- include image url in DTO
         return dto;
     }
 }
