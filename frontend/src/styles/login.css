@@ -1,0 +1,107 @@
+.login-container {
+  text-align: center;
+  margin-top: 40px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.back-btn {
+  background-color: #f0f0f0;
+  border: none;
+  color: #333;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background-color: #ddd;
+}
+
+
+.login-title {
+  margin-top: 10px;
+  font-size: 26px;
+  color: #222;
+  font-weight: 600;
+}
+
+.role-toggle {
+  margin: 20px 0;
+}
+
+.role-btn {
+  background-color: #221e1e;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.role-btn.active {
+  background-color: #4fbae0;
+}
+
+.login-form {
+  display: inline-block;
+  text-align: left;
+  padding: 25px 30px;
+  background-color: #fafafa;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  width: 320px;
+  min-height: 320px; 
+}
+
+
+.role-title {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #444;
+}
+
+
+.input-group {
+  margin-bottom: 10px;
+  min-height: 60px; 
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+
+.error-text {
+  color: red;
+  font-size: 13px;
+  margin: 4px 0 0 0;
+  min-height: 16px; 
+}
+
+.login-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #221e1e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  background-color: #4fbae0;
+}

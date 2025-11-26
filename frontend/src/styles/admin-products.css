@@ -1,0 +1,124 @@
+
+
+.admin-page {
+  text-align: center;
+  padding: 30px;
+  font-family: "Poppins", sans-serif;
+  background-color: #f9fafc;
+  min-height: 100vh;
+}
+
+.admin-page h2 {
+  color: #333;
+  font-size: 26px;
+  margin-bottom: 25px;
+}
+
+.back-btn {
+  margin-bottom: 25px;
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #5a6268;
+}
+
+.admin-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+}
+
+.admin-form input {
+  padding: 10px;
+  width: 200px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-form input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+
+.admin-form .btn {
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.3s ease;
+}
+
+.admin-form .btn:hover {
+  background-color: #0056b3;
+}
+
+
+.admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 80%;
+  max-width: 700px;
+}
+
+.admin-list li {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.admin-list li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.admin-list button {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background 0.3s ease;
+}
+
+.admin-list button:first-child {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.admin-list button:first-child:hover {
+  background-color: #e0a800;
+}
+
+.admin-list button:last-child {
+  background-color: #dc3545;
+  color: white;
+}
+
+.admin-list button:last-child:hover {
+  background-color: #b52b38;
+}
+

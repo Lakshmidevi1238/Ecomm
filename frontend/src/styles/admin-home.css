@@ -1,0 +1,68 @@
+.admin-home {
+  text-align: center;
+  font-family: "Poppins", sans-serif;
+  padding: 60px 20px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.admin-home h2 {
+  font-size: 32px;
+  color: #222;
+  margin-bottom: 50px;
+  font-weight: 600;
+}
+
+.logout-btn {
+  background-color: #000000;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.3s ease;
+  margin-bottom: 40px;
+}
+
+.logout-btn:hover {
+  background-color: #433133;
+}
+
+.admin-btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.admin-btn {
+  background-color: #08090a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 16px 30px;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  width: 220px;
+  height: 80px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-btn:hover {
+  background-color: #3c4044;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
+.admin-btn:nth-child(2) {
+  background-color: #000000;
+}
+
+.admin-btn:nth-child(2):hover {
+  background-color: #262a27;
+}
+

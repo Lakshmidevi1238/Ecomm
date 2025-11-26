@@ -1,0 +1,114 @@
+:root {
+  
+  --primary: #0b0c0d;   
+  --primary-hover: #4167b3;
+
+  --success: #0b0c0d;  
+  --success-hover: #4167b3;
+
+  --secondary: #0b0c0d;      
+  --secondary-hover: #4167b3;
+
+  --danger: #e53935;    
+  --danger-hover: #c62828;
+
+  --gray: #f7f7f7;    
+  --dark: #333;         
+  --border: #ddd;
+  --radius: 6px;
+  --font: "Segoe UI", Arial, sans-serif;
+}
+
+
+body {
+  font-family: var(--font);
+  background-color: var(--gray);
+  color: var(--dark);
+  margin: 0;
+  padding: 0;
+}
+
+
+.page-container {
+  text-align: center;
+  margin: 40px auto;
+  max-width: 600px;
+  padding: 20px;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+
+.page-title {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  color: var(--dark);
+  font-weight: 600;
+}
+
+
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.25s ease, transform 0.1s ease;
+  outline: none;
+}
+
+
+.btn:hover {
+  transform: scale(1.03);
+}
+
+
+.btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+
+.btn-primary {
+  background-color: var(--primary);
+}
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-success {
+  background-color: var(--success);
+}
+.btn-success:hover {
+  background-color: var(--success-hover);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+}
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+}
+.btn-danger:hover {
+  background-color: var(--danger-hover);
+}
+
+.btn-gray {
+  background-color: #555;
+}
+.btn-gray:hover {
+  background-color: #666;
+}
+
+
+.back-btn {
+  margin-top: 20px;
+}
