@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/login.css";
 
+
 function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -119,13 +120,22 @@ function LoginPage() {
           />
           <p className="error-text">{errors.password || " "}</p>
         </div>
-
+            
   
         {errors.api && <p className="error-text">{errors.api}</p>}
 
         <button type="submit" className="login-btn">
           Login
         </button>
+        <div className="forgot-row">
+  <button
+    type="button"
+    className="forgot-link"
+    onClick={() => navigate("/forgot-password")}
+  >
+    Forgot password?
+  </button>
+</div>
       </form>
     </div>
   );

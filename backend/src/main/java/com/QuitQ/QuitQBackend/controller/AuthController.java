@@ -1,7 +1,11 @@
 package com.QuitQ.QuitQBackend.controller;
 
-
-
+import com.QuitQ.QuitQBackend.config.JwtUtil;
+import com.QuitQ.QuitQBackend.dto.*;
+import com.QuitQ.QuitQBackend.model.Role;
+import com.QuitQ.QuitQBackend.model.User;
+import com.QuitQ.QuitQBackend.service.PasswordResetService;
+import com.QuitQ.QuitQBackend.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,15 +14,10 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import com.QuitQ.QuitQBackend.dto.SimpleResetRequest;
 
-import com.QuitQ.QuitQBackend.config.JwtUtil;
-import com.QuitQ.QuitQBackend.dto.AuthResponse;
-import com.QuitQ.QuitQBackend.dto.LoginRequest;
-import com.QuitQ.QuitQBackend.dto.RegisterRequest;
-import com.QuitQ.QuitQBackend.dto.UserDto;
-import com.QuitQ.QuitQBackend.model.Role;
-import com.QuitQ.QuitQBackend.model.User;
-import com.QuitQ.QuitQBackend.service.UserService;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -33,11 +32,13 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    
+    @Autowired
+    private PasswordResetService passwordResetService;
+
     @Value("${app.allowAdminRegistration:false}")
     private boolean allowAdminRegistration;
 
-    
+    // ---------- Register ----------
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
         if (userService.findByEmail(req.getEmail()).isPresent()) {
@@ -47,28 +48,21 @@ public class AuthController {
         User user = new User();
         user.setName(req.getName());
         user.setEmail(req.getEmail());
-        user.setPassword(req.getPassword()); 
+        user.setPassword(req.getPassword());
         user.setPhone(req.getPhone());
         user.setAddress(req.getAddress());
 
-        
         String requested = req.getRole();
-        Role finalRole = Role.ROLE_USER; 
+        Role finalRole = Role.ROLE_USER;
 
         if (requested != null) {
             String r = requested.trim().toUpperCase();
-          
             if (r.equals("SELLER") || r.equals("ROLE_SELLER")) {
                 finalRole = Role.ROLE_SELLER;
             } else if (r.equals("ADMIN") || r.equals("ROLE_ADMIN")) {
-                if (allowAdminRegistration) {
-                    finalRole = Role.ROLE_ADMIN;
-                } else {
-                  
-                    finalRole = Role.ROLE_USER;
-                }
+                if (allowAdminRegistration) finalRole = Role.ROLE_ADMIN;
+                else finalRole = Role.ROLE_USER;
             } else {
-                
                 finalRole = Role.ROLE_USER;
             }
         } else {
@@ -90,7 +84,7 @@ public class AuthController {
         return ResponseEntity.ok(ud);
     }
 
-    // Login
+    // ---------- Login ----------
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         try {
@@ -101,7 +95,6 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String email = userDetails.getUsername();
 
-           
             User u = userService.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
             String token = jwtUtil.generateToken(email, u.getRole().name());
@@ -115,6 +108,7 @@ public class AuthController {
         }
     }
 
+    // ---------- Me (whoami) ----------
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -126,12 +120,42 @@ public class AuthController {
                 .map(a -> a.getAuthority())
                 .toList();
 
-        var body = java.util.Map.of(
+        var body = Map.of(
                 "authenticated", authentication.isAuthenticated(),
                 "principal", authentication.getName(),
                 "roles", roles
         );
 
         return ResponseEntity.ok(body);
+    }
+
+    // Simple: POST /forgot-password with { email, password } -> updates password immediately
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPasswordSimple(@RequestBody SimpleResetRequest req) {
+        try {
+            boolean updated = userService.resetPasswordByEmail(req.getEmail(), req.getPassword());
+            if (updated) {
+                return ResponseEntity.ok(Map.of("message", "Password updated successfully."));
+            } else {
+                return ResponseEntity.status(404).body(Map.of("message", "Email not found."));
+            }
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "Server error"));
+        }
+    }
+
+
+    // ---------- Reset Password ----------
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest req) {
+        boolean ok = passwordResetService.resetPassword(req.getToken(), req.getEmail(), req.getPassword());
+        if (ok) {
+            return ResponseEntity.ok(Map.of("message", "Password reset successful."));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired token."));
+        }
     }
 }

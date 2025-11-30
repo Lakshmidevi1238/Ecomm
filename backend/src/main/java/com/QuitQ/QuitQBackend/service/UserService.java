@@ -14,6 +14,9 @@ public interface UserService {
 
     List<User> listAllUsers();
     User disableUser(Long id);
-    
+    /**
+     * Reset password for a user identified by email. Returns true if updated, false if email not found.
+     */
+    boolean resetPasswordByEmail(String email, String newPassword);
 }
 

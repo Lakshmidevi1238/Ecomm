@@ -15,6 +15,8 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminUsers from "./pages/AdminUsers";
 import SearchResults from "./pages/SearchResults";
 import SellerManage from "./pages/SellerManage"; 
+import ForgotPassword from "./pages/ForgotPassword";
+
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
        <Route path="/search-results" element={<SearchResults />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         
         <Route
           path="/user/home"

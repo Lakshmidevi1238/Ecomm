@@ -189,4 +189,28 @@ public class UserServiceImpl implements UserService {
 
         return u;
     }
+    @Override
+    @Transactional
+    public boolean resetPasswordByEmail(String email, String newPassword) {
+        if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
+        if (newPassword == null || !PASSWORD_PATTERN.matcher(newPassword).matches()) {
+            throw new IllegalArgumentException(
+                "Password must be at least 8 characters long and include one uppercase letter, one lowercase letter, and one number"
+            );
+        }
+
+        Optional<User> userOpt = repo.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return false; // email not found
+        }
+
+        User u = userOpt.get();
+        u.setPassword(passwordEncoder.encode(newPassword));
+        repo.save(u);
+        return true;
+    }
+
 }
