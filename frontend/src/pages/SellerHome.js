@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/seller-common.css";
-import "../styles/SellerHome.css";
+import "../styles/seller-common.css"; // your existing common styles
+import "../styles/SellerHome.css";   // new file below
 
 function SellerHome() {
   const navigate = useNavigate();
@@ -16,46 +16,53 @@ function SellerHome() {
   }, []);
 
   return (
-    <div className="page-container">
-      <h2 className="page-title">Welcome, Seller!</h2>
-      <p className="page-subtitle">
-        Manage your products, edit or delete, and handle customer orders.
-      </p>
+    <div className="seller-page">
+      <div className="hero-card">
+        <div className="hero-top">
+          <h1 className="hero-title">Welcome, Seller!</h1>
+          <p className="hero-sub">
+            Manage your products and orders — add new items, edit listings, and
+            keep customers happy.
+          </p>
+        </div>
 
-      <ul className="menu">
-        <li>
+        <div className="actions-grid">
           <button
-            className="btn btn-primary"
+            className="action-btn action-add"
             onClick={() => navigate("/seller/products")}
+            aria-label="Add new product"
           >
-            Add New Product
+            
+            <span className="label">Add New Product</span>
           </button>
-        </li>
 
-        <li>
           <button
-            className="btn btn-secondary"
+            className="action-btn action-edit"
             onClick={() => navigate("/seller/manage")}
+            aria-label="Edit or delete products"
           >
-            Edit/Delete Products
+            
+            <span className="label">Edit / Delete Products</span>
           </button>
-        </li>
 
-        <li>
           <button
-            className="btn btn-success"
+            className="action-btn action-orders"
             onClick={() => navigate("/seller/orders")}
+            aria-label="Manage orders"
           >
-            Manage Orders
+           
+            <span className="label">Manage Orders</span>
           </button>
-        </li>
 
-        <li>
-          <button className="btn btn-danger logout-btn" onClick={handleLogout}>
+        
+        </div>
+
+        <div className="hero-footer">
+          <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
   );
 }

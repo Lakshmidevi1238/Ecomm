@@ -1,261 +1,296 @@
+/* user-orders.css - polished Nykaa-like orders UI (updated) */
 
 .orders-container {
-  padding: 25px;
-  max-width: 900px;
+  padding: 28px 20px;
+  max-width: 980px;
   margin: 0 auto;
   font-family: "Poppins", sans-serif;
-  color: #222;
+  color: #111827;
+  box-sizing: border-box;
 }
 
-h2 {
-  font-weight: 600;
-  margin-bottom: 15px;
+.orders-container h2 {
+  font-weight: 700;
+  margin-bottom: 18px;
   text-align: center;
+  font-size: 26px;
 }
-
 
 .orders-header {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .back-btn,
 .refresh-btn {
   border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.04);
 }
 
 .back-btn {
-  background: #555;
+  background: #c88a55;
   color: white;
 }
 
-.back-btn:hover {
-  background: #333;
-  transform: scale(1.03);
-}
+.back-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(200,138,85,0.12); }
 
 .refresh-btn {
   background: #007bff;
   color: white;
 }
 
-.refresh-btn:hover {
-  background: #0056b3;
-  transform: scale(1.03);
-}
+.refresh-btn:hover { transform: translateY(-2px); }
 
 .last-updated {
   margin-left: auto;
   font-size: 13px;
-  color: #777;
-  font-style: italic;
+  color: #6b7280;
 }
 
+/* order card */
 .order-card {
-  background: #f9fafc;
-  border-radius: 10px;
-  padding: 15px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 28px rgba(2,6,23,0.04);
+  border: 1px solid #f3f6f8;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .order-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(2,6,23,0.06);
 }
 
 .order-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 12px;
 }
 
 .order-header strong {
   font-size: 16px;
-  color: #333;
+  color: #111827;
 }
 
+/* order info */
 .order-info {
-  margin-top: 8px;
-  line-height: 1.6;
+  margin-top: 10px;
+  line-height: 1.5;
   font-size: 14px;
+  color: #374151;
 }
 
-.payment-method {
-  font-weight: 500;
-  color: #007bff;
-}
-
+/* payment badge */
 .payment-badge {
-  padding: 5px 12px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
   text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: 0.5px;
+  font-size: 12px;
+  letter-spacing: 0.4px;
   border: 1px solid transparent;
-  min-width: 70px;
+  min-width: 80px;
   text-align: center;
 }
 
 .payment-badge.paid {
-  background-color: #d4edda;
-  color: #155724;
-  border-color: #c3e6cb;
+  background-color: #dff6ea;
+  color: #0f5132;
+  border-color: #c7ebd5;
 }
 
 .payment-badge.pending {
-  background-color: #fff3cd;
-  color: #856404;
-  border-color: #ffeeba;
+  background-color: #fff7e6;
+  color: #6b4f00;
+  border-color: #ffe9b8;
 }
 
 .payment-badge.unknown {
-  background-color: #e2e3e5;
-  color: #383d41;
-  border-color: #d6d8db;
+  background-color: #f2f4f7;
+  color: #374151;
+  border-color: #e6e9ef;
 }
 
+/* ===== remove bullets on lists in the status section ===== */
+.order-status-section ul,
+.order-status-section li,
 .order-status-section {
-  margin-top: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
+
+/* status section */
+.order-status-section { margin-top: 16px; }
 
 .order-status-section h4 {
   font-size: 15px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: #111827;
 }
 
+/* each item in status list */
 .status-item {
-  margin-bottom: 18px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px;
-  border: 1px solid #e6e6e6;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #f1f3f5;
+  position: relative;
+  overflow: hidden; /* clip pseudo-element lines so they don't leak outside the card */
 }
 
 .status-line {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .status-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex: 1;
+}
+
+.status-left b {
+  font-size: 15px;
+  color: #111827;
 }
 
 .item-status {
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
   font-size: 12px;
   text-transform: uppercase;
-  font-weight: 500;
-  color: white;
+  font-weight: 700;
+  color: #fff;
 }
 
-.item-status.placed {
-  background: #6c757d;
-}
+.item-status.placed { background: #6b7280; }
+.item-status.processing { background: #007bff; }
+.item-status.shipped { background: #f59e0b; color: #111; }
+.item-status.delivered { background: #10b981; }
 
-.item-status.processing {
-  background: #007bff;
-}
-
-.item-status.shipped {
-  background: #ffc107;
-  color: #222;
-}
-
-.item-status.delivered {
-  background: #28a745;
-}
-
+/* progress strip container (inside card) */
+/* Use CSS variable --progress to control the width of the active portion (e.g. --progress: 50%) */
 .progress-container {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 15px;
-  position: relative;
-  width: 100%;
-  padding: 0 10px;
+  margin-top: 14px;
+  padding: 0 8px;     /* small padding so circles sit nicely */
+  gap: 8px;
+  height: 48px;
+  box-sizing: border-box;
 }
 
-.progress-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  flex: 1;
-  text-align: center;
-}
-
-
-.progress-step:not(:last-child)::after {
+/* base connector line across progress area */
+.progress-container::before {
   content: "";
   position: absolute;
-  top: 13px; 
-  left: 50%;
-  width: 100%;
-  height: 3px;
-  background-color: #ccc; 
+  left: 6%;
+  right: 6%;
+  top: 22px;
+  height: 4px;
+  background: linear-gradient(90deg, #e6e9ef 0%, #e6e9ef 100%);
+  border-radius: 4px;
   z-index: 1;
 }
 
+/* active portion - width controlled by --progress */
+.progress-container::after {
+  content: "";
+  position: absolute;
+  left: 6%;
+  top: 22px;
+  height: 4px;
+  background: linear-gradient(90deg, #c88a55 0%, #eec557 100%);
+  border-radius: 4px;
+  z-index: 2;
+  width: var(--progress, 0%); /* default 0% */
+  transition: width 0.32s ease;
+}
 
+/* step (circle + label) */
+.progress-step {
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* circle styling */
 .circle {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background-color: #ccc;
+  background: #e6e9ef;
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2;
-  margin: 0 auto;
-  transition: all 0.3s ease;
+  transition: all 0.24s ease;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.04);
 }
-
 
 .circle.active {
-  background-color: #007bff;
-}
-
-.circle.delivered {
-  background-color: #16a34a;
+  background: linear-gradient(180deg, #c88a55, #a66e3f);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(200,138,85,0.14);
 }
 
 .step-label {
-  font-size: 0.75rem;
-  color: #555;
-  margin-top: 5px;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
   text-transform: uppercase;
 }
 
+/* shipping info block */
 .shipping-info {
-  background: #eef5ff;
+  background: #f8fafc;
   border-radius: 8px;
-  padding: 10px;
+  padding: 12px;
   margin-top: 12px;
   font-size: 14px;
-  line-height: 1.5;
+  color: #374151;
 }
 
 .shipping-info h4 {
-  font-size: 15px;
-  margin-bottom: 5px;
-  color: #333;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* small responsive tweaks */
+@media (max-width: 780px) {
+  .order-card { padding: 14px; }
+  .progress-container::before, .progress-container::after {
+    left: 10%;
+    right: 10%;
+  }
+}
+
+@media (max-width: 480px) {
+  .status-line { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .status-left img { display: none; }
 }
