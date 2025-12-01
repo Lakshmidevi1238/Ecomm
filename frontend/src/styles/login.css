@@ -42,7 +42,7 @@
 }
 
 .role-btn.active {
-  background-color: #4fbae0;
+  background-color: #c88a55
 }
 
 .login-form {
@@ -78,7 +78,7 @@
 }
 
 .form-input:focus {
-  border-color: #007bff;
+  border-color: #5486bb;
   outline: none;
 }
 
@@ -103,11 +103,11 @@
 }
 
 .login-btn:hover {
-  background-color: #4fbae0;
+  background-color: #c88a55;
 }
 .forgot-link {
   width: 40%;
-  background-color: #4fbae0;
+  background-color: #c88a55;
   color: white;
   border: none;
   border-radius: 4px;

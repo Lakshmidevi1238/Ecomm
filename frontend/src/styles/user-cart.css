@@ -1,45 +1,223 @@
+
+
+/* --- Fix: ensure content doesn't get hidden behind floating checkout bar --- */
+
+/* Reserve space at the bottom of the page for the floating bar */
 .user-cart-container {
-  padding: 20px;
+  /* keep existing padding, but ensure extra bottom space for the bar */
+  padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
 }
 
-.cart-item {
+/* Ensure the list has enough bottom margin (so last item scrolls above bar) */
+.cart-list {
+  margin-bottom: calc(160px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Slightly larger, responsive floating bar with safe-area support */
+.floating-checkout-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  padding: 18px 26px;
   display: flex;
   justify-content: space-between;
-  background: #f1f5f9;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 8px;
+  align-items: center;
+  box-shadow: 0 -6px 26px rgba(0, 0, 0, 0.12);
+  font-size: 16px;
+  z-index: 1400;
+  gap: 12px;
+  /* account for iOS notch safe area */
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
 }
 
-.cart-summary {
-  margin-top: 20px;
+/* When screen is small: stack content vertically and make buttons full width */
+@media (max-width: 640px) {
+  .floating-checkout-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .floating-checkout-bar > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .floating-checkout-bar .checkout-btn,
+  .floating-checkout-bar .clear-btn {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
+  .floating-checkout-bar > div:nth-child(1) {
+    justify-content: flex-start;
+    gap: 8px;
+  }
 }
+
+/* If you want the floating bar to be slightly smaller on narrow screens */
+@media (max-width: 420px) {
+  .floating-checkout-bar {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+
+/* Cart item card */
+.cart-item {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Left section */
+.cart-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cart-item-img {
+  width: 90px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(16, 24, 40, 0.1);
+}
+
+.cart-item-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cart-item-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #c88a55;
+}
+
+/* -------- QUANTITY STEPPER (NYKAA STYLE) -------- */
+
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-circle {
+  width: 32px;
+  height: 32px;
+  background: #c88a55;
+  color: #fff;
+  border-radius: 50%;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.15s;
+  box-shadow: 0 4px 10px rgba(200, 138, 85, 0.18);
+}
+
+.qty-circle:hover {
+  background: #eec557;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(200, 138, 85, 0.28);
+}
+
+.qty-number {
+  font-size: 17px;
+  font-weight: 700;
+  width: 22px;
+  text-align: center;
+}
+
+/* remove button */
+.remove-btn {
+  background: #ff4d4f;
+  color: #fff;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.15s;
+}
+
+.remove-btn:hover {
+  background: #d62828;
+  transform: translateY(-2px);
+}
+
+/* -------- FLOATING CHECKOUT BAR -------- */
+
+.floating-checkout-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+  font-size: 16px;
+  z-index: 999;
+  font-weight: 600;
+}
+
+.subtotal-value {
+  color: #c88a55;
+  font-weight: 800;
+}
+
+/* checkout buttons */
 
 .checkout-btn {
-  background: green;
-  color: white;
-  padding: 8px 15px;
+  background: #c88a55;
+  color: #08121a;
+  padding: 12px 18px;
   border: none;
-  margin-right: 10px;
-  border-radius: 5px;
+  border-radius: 10px;
+  margin-right: 12px;
   cursor: pointer;
+  font-weight: 700;
+  transition: 0.15s;
+  box-shadow: 0 8px 22px rgba(200, 138, 85, 0.16);
+}
+
+.checkout-btn:hover {
+  background: #eec557;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(200, 138, 85, 0.28);
 }
 
 .clear-btn {
-  background: red;
+  background: #ff4d4f;
   color: white;
-  padding: 8px 15px;
+  padding: 12px 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: 700;
+  transition: 0.15s;
 }
 
-.back-btn {
-  background: gray;
-  color: white;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  cursor: pointer;
+.clear-btn:hover {
+  background: #d62828;
+  transform: translateY(-2px);
 }

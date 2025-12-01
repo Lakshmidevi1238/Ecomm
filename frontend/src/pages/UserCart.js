@@ -58,54 +58,102 @@ function UserCart() {
     navigate("/user/checkout");
   };
 
+  const subtotal = cart.reduce((s, i) => s + i.lineTotal, 0);
+  const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+
   return (
     <div className="user-cart-container">
+
       <h2>Your Cart</h2>
+
       <button onClick={() => navigate("/user/home")} className="back-btn">
         Back to Home
       </button>
 
       {cart.length === 0 ? (
-        <p>Cart is empty.</p>
+        <p>Your cart is empty.</p>
       ) : (
         <div>
-          {cart.map((item) => {
-            const img = getImageUrl(item.imageUrl || item.productImage || item.product?.imageUrl);
-            return (
-              <div key={item.cartItemId} className="cart-item">
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  {img && <img src={img} alt={item.productName} style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 6 }} />}
-                  <span>
-                    <b>{item.productName}</b> — ₹{item.unitPrice} × {item.quantity}
-                  </span>
+          <div className="cart-list">
+            {cart.map((item) => {
+              const img = getImageUrl(
+                item.imageUrl ||
+                  item.productImage ||
+                  item.product?.imageUrl
+              );
+
+              return (
+                <div key={item.cartItemId} className="cart-item fade-slide">
+                  <div className="cart-item-left">
+                    {img && (
+                      <img
+                        src={img}
+                        alt={item.productName}
+                        className="cart-item-img"
+                      />
+                    )}
+                    <div>
+                      <div className="cart-item-name">{item.productName}</div>
+                      <div className="cart-item-price">
+                        ₹{item.unitPrice} × {item.quantity}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="cart-item-actions">
+                    <button
+                      className="qty-circle"
+                      onClick={() =>
+                        updateCartItem(item.cartItemId, item.quantity + 1)
+                      }
+                    >
+                      +
+                    </button>
+
+                    <span className="qty-number">{item.quantity}</span>
+
+                    <button
+                      className="qty-circle"
+                      onClick={() =>
+                        item.quantity > 1
+                          ? updateCartItem(item.cartItemId, item.quantity - 1)
+                          : deleteCartItem(item.cartItemId)
+                      }
+                    >
+                      –
+                    </button>
+
+                    <button
+                      className="remove-btn"
+                      onClick={() => deleteCartItem(item.cartItemId)}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <button onClick={() => updateCartItem(item.cartItemId, item.quantity + 1)}>add</button>
-                  <button
-                    onClick={() =>
-                      item.quantity > 1
-                        ? updateCartItem(item.cartItemId, item.quantity - 1)
-                        : deleteCartItem(item.cartItemId)
-                    }
-                  >
-                    minus
-                  </button>
-                  <button onClick={() => deleteCartItem(item.cartItemId)}>Remove</button>
-                </div>
-              </div>
-            );
-          })}
-          <div className="cart-summary">
-            <p>
-              Total Items: {cart.reduce((s, i) => s + i.quantity, 0)} | Subtotal: ₹
-              {cart.reduce((s, i) => s + i.lineTotal, 0)}
-            </p>
-            <button onClick={handleCheckoutClick} className="checkout-btn">
-              Proceed to Checkout
-            </button>
-            <button onClick={clearCart} className="clear-btn">
-              Clear Cart
-            </button>
+              );
+            })}
+          </div>
+
+          {/* Floating Checkout Summary */}
+          <div className="floating-checkout-bar">
+            <div>
+              <strong>{totalItems} items</strong> | Subtotal:{" "}
+              <span className="subtotal-value">₹{subtotal}</span>
+            </div>
+
+            <div>
+              <button
+                onClick={handleCheckoutClick}
+                className="checkout-btn"
+              >
+                Proceed to Checkout
+              </button>
+
+              <button onClick={clearCart} className="clear-btn">
+                Clear Cart
+              </button>
+            </div>
           </div>
         </div>
       )}

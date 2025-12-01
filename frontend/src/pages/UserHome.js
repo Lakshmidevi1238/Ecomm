@@ -167,69 +167,87 @@ function UserHome() {
         </div>
       </section>
 
-      {selectedProduct && (
-        <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-top">
-              <div className="modal-image">
-                {selectedProduct.imageUrl ? (
-                  <img
-                    src={getImageUrl(selectedProduct.imageUrl)}
-                    alt={selectedProduct.name}
-                    style={{ width: "100%", objectFit: "cover", borderRadius: 8 }}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/images/placeholder.png";
-                    }}
-                  />
-                ) : (
-                  <div style={{ width: "100%", height: 220, background: "#f4f4f4" }}>
-                    No image
-                  </div>
-                )}
-              </div>
-              <div className="modal-info">
-                <h3>{selectedProduct.name}</h3>
-                <p className="modal-price">₹{selectedProduct.price}</p>
-                <p>
-                  <strong>Brand:</strong> {selectedProduct.brand || "N/A"}
-                </p>
-                <p>
-                  <strong>Category:</strong>{" "}
-                  {selectedProduct.category?.name || selectedProduct.categoryName}
-                </p>
-                <p>
-                  <strong>Stock:</strong>{" "}
-                  {selectedProduct.stock > 0
-                    ? `${selectedProduct.stock} available`
-                    : "Out of stock"}
-                </p>
-              </div>
-            </div>
+    {selectedProduct && (
+  <div
+    className="modal-overlay"
+    onClick={() => setSelectedProduct(null)}
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      className="modal-content product-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button
+        className="modal-close-x"
+        onClick={() => setSelectedProduct(null)}
+        aria-label="Close"
+      >
+        ×
+      </button>
 
-            <p className="modal-description">
-              {selectedProduct.description || "No description available."}
-            </p>
+      <div className="modal-top product-modal-grid">
+        <div className="modal-image">
+          {selectedProduct.imageUrl ? (
+            <img
+              src={getImageUrl(selectedProduct.imageUrl)}
+              alt={selectedProduct.name}
+              className="product-modal-image"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/images/placeholder.png";
+              }}
+            />
+          ) : (
+            <div className="no-image-large">No image</div>
+          )}
+        </div>
 
-            <div className="modal-actions">
-              <button
-                onClick={() => {
-                  addToCart(selectedProduct.id);
-                }}
-                className="btn-primary"
-              >
-                Add to Cart
-              </button>
-              <button
-                className="modal-close-btn"
-                onClick={() => setSelectedProduct(null)}
-              >
-                Close
-              </button>
-            </div>
+        <div className="modal-info">
+          <h3 className="modal-title">{selectedProduct.name}</h3>
+
+          <p className="modal-price">₹{selectedProduct.price}</p>
+
+          <p className="modal-meta">
+            <strong>Brand:</strong> {selectedProduct.brand || "N/A"}
+          </p>
+
+          <p className="modal-meta">
+            <strong>Category:</strong>{" "}
+            {selectedProduct.category?.name || selectedProduct.categoryName}
+          </p>
+
+          <p className={`modal-stock ${selectedProduct.stock > 0 ? "in-stock" : "out-stock"}`}>
+            {selectedProduct.stock > 0 ? `${selectedProduct.stock} available` : "Out of stock"}
+          </p>
+
+          <div className="modal-actions">
+            <button
+              onClick={() => addToCart(selectedProduct.id)}
+              className={selectedProduct.stock <= 0 ? "btn-disabled" : "btn-primary"}
+              disabled={selectedProduct.stock <= 0}
+            >
+              {selectedProduct.stock <= 0 ? "Out of Stock" : "Add to Cart"}
+            </button>
+
+            <button
+              className="btn-secondary"
+              onClick={() => setSelectedProduct(null)}
+            >
+              Close
+            </button>
           </div>
         </div>
-      )}
+      </div>
+
+      <div className="modal-description">
+        <h4>Description</h4>
+        <p>{selectedProduct.description || "No description available."}</p>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
