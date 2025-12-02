@@ -1,0 +1,30 @@
+﻿version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: quitq_backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - APP_UPLOAD_DIR=/opt/quitq/uploads
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/quit_q?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Qazplm1.
+      - SPRING_MVC_PATHMATCH_MATCHING_STRATEGY=ant_path_matcher
+    volumes:
+      - ./uploads:/opt/quitq/uploads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: quitq_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+
+    

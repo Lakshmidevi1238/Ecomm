@@ -1,11 +1,10 @@
-// src/components/SellerProducts.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-common.css";
 import "../styles/SellerProducts.css";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+const BASE_URL = process.env.REACT_APP_API_URL ?? "";
 
 function SellerProducts() {
   const [products, setProducts] = useState([]);
@@ -18,91 +17,71 @@ function SellerProducts() {
     brand: "",
     categoryId: "",
   });
-  const [selectedFile, setSelectedFile] = useState(null); // NEW
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     fetchProducts();
     fetchCategories();
   }, []);
 
+  const authHeaders = () => ({ headers: { Authorization: `Bearer ${token}` } });
+
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/api/v1/seller/products`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`${BASE_URL}/api/v1/seller/products`, authHeaders());
       setProducts(res.data || []);
     } catch (err) {
       console.error("Error fetching products:", err);
+      if (err?.response?.status === 401) navigate("/login");
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/api/v1/seller/all`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`${BASE_URL}/api/v1/categories`, authHeaders());
       setCategories(res.data || []);
     } catch (err) {
       console.error("Error fetching categories:", err);
+      if (err?.response?.status === 401) navigate("/login");
     }
   };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    if (!form.categoryId) {
-      alert("Please select a category!");
-      return;
-    }
 
     try {
       const payload = {
         ...form,
         price: parseFloat(form.price),
-        stock: parseInt(form.stock || "0"),
-        categoryId: parseInt(form.categoryId),
+        stock: parseInt(form.stock || "0", 10),
+        categoryId: parseInt(form.categoryId, 10),
       };
 
-      // 1) create product (JSON)
-      const res = await axios.post(`${BASE_URL}/api/v1/seller/products`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await axios.post(`${BASE_URL}/api/v1/seller/products`, payload, authHeaders());
       const createdProduct = res.data;
-      // 2) if file selected, upload image to /seller/products/{id}/image
-      if (selectedFile && createdProduct && createdProduct.id) {
+
+      if (selectedFile && createdProduct?.id) {
         const formData = new FormData();
         formData.append("file", selectedFile);
 
-        try {
-          await axios.post(
-            `${BASE_URL}/api/v1/seller/products/${createdProduct.id}/image`,
-            formData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-        } catch (imgErr) {
-          console.error("Image upload failed:", imgErr);
-          // non-fatal — product created, image failed
-          alert("Product created but image upload failed.");
-        }
+        await axios.post(
+          `${BASE_URL}/api/v1/seller/products/${createdProduct.id}/image`,
+          formData,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       }
 
       alert("Product added successfully!");
-      // reset
-      setForm({
-        name: "",
-        price: "",
-        description: "",
-        stock: "",
-        brand: "",
-        categoryId: "",
-      });
+      setForm({ name: "", price: "", description: "", stock: "", brand: "", categoryId: "" });
       setSelectedFile(null);
       fetchProducts();
     } catch (err) {
@@ -113,16 +92,14 @@ function SellerProducts() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/api/v1/seller/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(`${BASE_URL}/api/v1/seller/products/${id}`, authHeaders());
       fetchProducts();
     } catch (err) {
-      console.error("Error deleting product:", err);
+      console.error("Delete failed:", err);
+      alert("Failed to delete!");
     }
   };
 
-  // helper to get full image URL (backend serves /uploads/**)
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
     if (imageUrl.startsWith("http")) return imageUrl;
@@ -133,7 +110,7 @@ function SellerProducts() {
     <div className="page-container">
       <h2 className="page-title">Manage Products</h2>
 
-      <form onSubmit={handleAddProduct} className="product-form" encType="multipart/form-data">
+      <form onSubmit={handleAddProduct} className="product-form">
         <input
           type="text"
           placeholder="Product Name"
@@ -167,7 +144,7 @@ function SellerProducts() {
 
         <input
           type="number"
-          placeholder="Stock Quantity"
+          placeholder="Stock"
           value={form.stock}
           onChange={(e) => setForm({ ...form, stock: e.target.value })}
           required
@@ -179,16 +156,13 @@ function SellerProducts() {
           required
         >
           <option value="">-- Select Category --</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
           ))}
         </select>
 
-        {/* NEW: file input */}
         <label className="file-label">
-          Product Photo (optional)
+          Upload Image
           <input
             type="file"
             accept="image/*"
@@ -196,55 +170,32 @@ function SellerProducts() {
           />
         </label>
 
-        <button type="submit" className="btn btn-success">
-          Add Product
-        </button>
+        <button type="submit" className="btn btn-success">Add Product</button>
       </form>
 
       <h3 className="sub-title">My Products</h3>
+
       <ul className="product-list">
         {products.map((p) => (
           <li key={p.id} className="product-item">
-            <div style={{ display: "flex", gap: 12 }}>
-              <div>
-                {p.imageUrl ? (
-                  <img
-                    src={getImageUrl(p.imageUrl)}
-                    alt={p.name}
-                    style={{ width: 120, height: 90, objectFit: "cover", borderRadius: 6 }}
-                  />
-                ) : (
-                  <div style={{ width: 120, height: 90, background: "#eee", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:6 }}>
-                    No Image
-                  </div>
-                )}
-              </div>
-              <div>
-                <strong>{p.name}</strong> — ₹{p.price}
-                <br />
-                <small>{p.description}</small>
-                <div> Stock: {p.stock}</div>
-                <div> Brand: {p.brand}</div>
-                {p.category && (
-                  <div className="product-category">
-                    <em>Category: {p.category.name}</em>
-                  </div>
-                )}
-              </div>
+            <img
+              src={getImageUrl(p.imageUrl)}
+              alt={p.name}
+              style={{ width: 120, height: 90, objectFit: "cover" }}
+            />
+
+            <div className="info">
+              <strong>{p.name}</strong> — ₹{p.price}
+              <div>Stock: {p.stock}</div>
+              <div>Brand: {p.brand}</div>
             </div>
 
-            <div style={{ marginLeft: "auto" }}>
-              <button className="btn btn-danger" onClick={() => handleDelete(p.id)}>
-                Delete
-              </button>
-            </div>
+            <button className="btn btn-danger" onClick={() => handleDelete(p.id)}>
+              Delete
+            </button>
           </li>
         ))}
       </ul>
-
-      <button onClick={() => navigate("/seller/home")} className="btn btn-gray back-btn">
-        Back to Home
-      </button>
     </div>
   );
 }

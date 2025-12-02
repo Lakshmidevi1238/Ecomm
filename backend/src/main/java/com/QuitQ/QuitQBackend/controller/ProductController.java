@@ -14,8 +14,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.*;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -42,7 +53,6 @@ public class ProductController {
                 .toList();
         return ResponseEntity.ok(dtos);
     }
-
 
     @GetMapping("/products/{id}")
     public ResponseEntity<?> getProduct(@PathVariable Long id) {
@@ -76,18 +86,26 @@ public class ProductController {
         return ResponseEntity.status(201).body(toDto(saved));
     }
 
-    // NEW: upload image for a seller product
+    // Upload image for a seller product.
+    // NOTE: the service stores imageUrl as "/uploads/{filename}" — frontend should use /uploads/{filename} (public static path),
+    // not /api/v1/seller/products/{id}/image (that path is secured to sellers).
     @PostMapping("/seller/products/{id}/image")
     public ResponseEntity<?> uploadProductImage(@PathVariable("id") Long id,
                                                 @RequestParam("file") MultipartFile file,
-                                                Authentication auth) {
+                                                Authentication auth,
+                                                UriComponentsBuilder uriBuilder) {
         if (auth == null || !auth.isAuthenticated()) return ResponseEntity.status(401).body("Unauthorized");
         User seller = userService.findByEmail(auth.getName()).orElseThrow(() -> new RuntimeException("User not found"));
         try {
             ProductDto dto = productService.uploadProductImage(id, file, seller);
-            return ResponseEntity.ok(dto);
-        } catch (RuntimeException | java.io.IOException ex) {
-            return ResponseEntity.status(400).body(Map.of("message", ex.getMessage()));
+            // build location header to the public URL (imageUrl is like "/uploads/{filename}")
+            URI location = uriBuilder.path(dto.getImageUrl()).build().toUri();
+            return ResponseEntity.created(location).body(dto);
+        } catch (ResponseStatusException rse) {
+            // service used ResponseStatusException for controlled errors
+            return ResponseEntity.status(rse.getStatusCode()).body(Map.of("message", rse.getReason()));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(Map.of("message", ex.getMessage()));
         }
     }
 
@@ -174,4 +192,58 @@ public class ProductController {
         dto.setImageUrl(p.getImageUrl()); // <-- include image url in DTO
         return dto;
     }
+    @GetMapping("/seller/products/{id}/image")
+    public ResponseEntity<?> getProductImageById(@PathVariable("id") Long id) {
+        // find product
+        Optional<Product> opt = productRepository.findById(id);
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Product not found"));
+        }
+        Product p = opt.get();
+        String imageUrl = p.getImageUrl(); // expected like "/uploads/<filename>" or full URL
+
+        // If product has no imageUrl, return 404
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return ResponseEntity.status(404).body(Map.of("message", "Image not found"));
+        }
+
+        // If imageUrl is an absolute URL, redirect to it
+        if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.LOCATION, imageUrl);
+            return ResponseEntity.status(302).headers(headers).build();
+        }
+
+        // Normalize path: if imageUrl starts with "/uploads/", map to upload dir
+        String uploadsPath = System.getenv().getOrDefault("APP_UPLOAD_DIR", "/opt/quitq/uploads");
+        String expectedPrefix = "/uploads/";
+        String filename = imageUrl;
+        if (imageUrl.startsWith(expectedPrefix)) {
+            filename = imageUrl.substring(expectedPrefix.length());
+        } else if (imageUrl.startsWith("/")) {
+            // strip leading slash
+            filename = imageUrl.substring(1);
+        }
+
+        Path file = Paths.get(uploadsPath).resolve(filename).normalize();
+        if (!Files.exists(file) || !Files.isReadable(file)) {
+            return ResponseEntity.status(404).body(Map.of("message", "Image file not found"));
+        }
+
+        try {
+            Resource resource = new UrlResource(file.toUri());
+            // determine content type
+            String contentType = Files.probeContentType(file);
+            if (contentType == null) contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFileName().toString() + "\"")
+                    .body(resource);
+        } catch (MalformedURLException ex) {
+            return ResponseEntity.status(500).body(Map.of("message", "Failed to read image"));
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(Map.of("message", "Unexpected error"));
+        }
+    }
+
 }
