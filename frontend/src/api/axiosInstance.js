@@ -1,3 +1,4 @@
+// src/api/axiosInstance.js
 import axios from "axios";
 
 let navigateFunction;
@@ -7,13 +8,14 @@ export const setNavigate = (navigate) => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api/v1` : "/api/v1",
 });
 
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -24,11 +26,15 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (!error.response) {
+      console.error("Network or CORS error:", error);
+      return Promise.reject(error);
+    }
+
+    const status = error.response.status;
+    if (status === 401) {
       localStorage.clear();
-      if (navigateFunction) {
-        navigateFunction("/login"); 
-      }
+      if (navigateFunction) navigateFunction("/login");
     }
     return Promise.reject(error);
   }

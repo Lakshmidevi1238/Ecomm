@@ -1,3 +1,4 @@
+// src/main/java/com/QuitQ/QuitQBackend/config/WebMvcConfig.java
 package com.QuitQ.QuitQBackend.config;
 
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,8 @@ import java.nio.file.Paths;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    @Value("${app.upload.dir:${user.home}/quitq-uploads}")
+    // Read APP_UPLOAD_DIR environment variable; default to /opt/quitq/uploads inside container
+    @Value("${APP_UPLOAD_DIR:/opt/quitq/uploads}")
     private String uploadDir;
 
     @Override
@@ -19,6 +21,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
         Path uploadPath = Paths.get(uploadDir);
         String uploadAbsolutePath = uploadPath.toFile().getAbsolutePath() + "/";
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadAbsolutePath);
+        		.addResourceLocations("file:" + uploadDir + "/")
+                .setCachePeriod(3600);
     }
 }

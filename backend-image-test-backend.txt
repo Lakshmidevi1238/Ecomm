@@ -1,0 +1,33 @@
+﻿curl.exe : * Host localhost:8080 was resolved.
+At line:1 char:1
++ curl.exe -v http://localhost:8080/api/v1/seller/products/6/image 2>&1 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (* Host localhost:8080 was resolved.:Strin 
+   g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   
+Trying [::1]:8080...
+* Established connection to localhost (::1 port 8080) from ::1 port 55998 
+* using HTTP/1.x
+> GET /api/v1/seller/products/6/image HTTP/1.1
+
+> Host: localhost:8080
+
+> User-Agent: curl/8.16.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+* Empty reply from server
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+* shutting down connection #0
+curl: (52) Empty reply from server

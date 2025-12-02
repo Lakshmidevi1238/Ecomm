@@ -1,11 +1,11 @@
-// src/components/SellerManage.jsx
-import React, { useState, useEffect } from "react";
+// src/pages/SellerManage.js
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/seller-common.css";
 import "../styles/SellerManage.css";
 
-const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+const BASE_URL = process.env.REACT_APP_API_URL ?? "";
 
 function SellerManage() {
   const [products, setProducts] = useState([]);
@@ -23,48 +23,55 @@ function SellerManage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const authHeaders = () => ({ headers: { Authorization: `Bearer ${token}` } });
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/api/v1/seller/products`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`${BASE_URL}/api/v1/seller/products`, authHeaders());
       setProducts(res.data || []);
     } catch (err) {
-      console.error("Error fetching products:", err);
+      console.error("Error fetching products:", err?.response?.status, err?.response?.data || err.message);
+      if (err?.response?.status === 401) navigate("/login");
     }
   };
 
   const handleEditClick = (product) => {
     setEditingId(product.id);
     setEditForm({
-      name: product.name,
-      price: product.price,
+      name: product.name || "",
+      price: product.price ?? "",
       description: product.description || "",
-      stock: product.stock,
-      brand: product.brand,
+      stock: product.stock ?? "",
+      brand: product.brand || "",
     });
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (!editingId) return;
     try {
       await axios.put(
         `${BASE_URL}/api/v1/seller/products/${editingId}`,
         {
           ...editForm,
           price: parseFloat(editForm.price),
-          stock: parseInt(editForm.stock),
+          stock: parseInt(editForm.stock, 10),
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        authHeaders()
       );
       alert("Product updated successfully!");
       setEditingId(null);
       fetchProducts();
     } catch (err) {
-      console.error("Error updating product:", err);
+      console.error("Error updating product:", err?.response?.status, err?.response?.data || err.message);
       alert("Failed to update product!");
     }
   };
@@ -72,50 +79,43 @@ function SellerManage() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      await axios.delete(`${BASE_URL}/api/v1/seller/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(`${BASE_URL}/api/v1/seller/products/${id}`, authHeaders());
       alert("Product deleted successfully!");
       fetchProducts();
     } catch (err) {
-      console.error("Error deleting product:", err);
+      console.error("Error deleting product:", err?.response?.status, err?.response?.data || err.message);
       alert("Failed to delete product!");
     }
   };
 
- // Replace existing handleUploadImage with this
-const handleUploadImage = async (productId) => {
-  const file = fileMap[productId];
-  if (!file) {
-    alert("Please choose a file first.");
-    return;
-  }
-  const formData = new FormData();
-  formData.append("file", file);
+  const handleUploadImage = async (productId) => {
+    const file = fileMap[productId];
+    if (!file) {
+      alert("Please choose a file first.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    // IMPORTANT: do NOT set 'Content-Type' header; axios sets boundary automatically
-    await axios.post(`${BASE_URL}/api/v1/seller/products/${productId}/image`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        // Do not add "Content-Type" here
-      },
-    });
-    alert("Image uploaded!");
-    setFileMap((m) => {
-      const copy = { ...m };
-      delete copy[productId];
-      return copy;
-    });
-    fetchProducts();
-  } catch (err) {
-    console.error("Upload failed:", err);
-    // show server response body if available for easier debugging
-    const serverMessage = err?.response?.data || err?.message || "Unknown error";
-    alert("Image upload failed: " + JSON.stringify(serverMessage));
-  }
-};
-
+    try {
+      await axios.post(`${BASE_URL}/api/v1/seller/products/${productId}/image`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert("Image uploaded!");
+      setFileMap((m) => {
+        const copy = { ...m };
+        delete copy[productId];
+        return copy;
+      });
+      fetchProducts();
+    } catch (err) {
+      console.error("Upload failed:", err?.response?.status, err?.response?.data || err.message);
+      const serverMessage = err?.response?.data || err?.message || "Unknown error";
+      alert("Image upload failed: " + JSON.stringify(serverMessage));
+    }
+  };
 
   const getImageUrl = (imageUrl) => {
     if (!imageUrl) return null;
@@ -153,12 +153,12 @@ const handleUploadImage = async (productId) => {
                 <tr key={p.id}>
                   <td>{p.id}</td>
                   <td>
-                    {/* Optionally show current image while editing */}
                     {p.imageUrl ? (
                       <img
                         src={getImageUrl(p.imageUrl)}
                         alt="prod"
                         style={{ width: 80, height: 60, objectFit: "cover" }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = "/images/placeholder.png"; }}
                       />
                     ) : (
                       <div style={{ width: 80, height: 60, background: "#eee" }} />
@@ -214,6 +214,7 @@ const handleUploadImage = async (productId) => {
                         src={getImageUrl(p.imageUrl)}
                         alt={p.name}
                         style={{ width: 80, height: 60, objectFit: "cover", borderRadius: 6 }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = "/images/placeholder.png"; }}
                       />
                     ) : (
                       <div style={{ width: 80, height: 60, background: "#f0f0f0" }} />
@@ -222,15 +223,9 @@ const handleUploadImage = async (productId) => {
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) =>
-                          setFileMap((m) => ({ ...m, [p.id]: e.target.files?.[0] || null }))
-                        }
+                        onChange={(e) => setFileMap((m) => ({ ...m, [p.id]: e.target.files?.[0] || null }))}
                       />
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleUploadImage(p.id)}
-                        style={{ marginTop: 4 }}
-                      >
+                      <button className="btn btn-primary" onClick={() => handleUploadImage(p.id)} style={{ marginTop: 4 }}>
                         Upload Image
                       </button>
                     </div>

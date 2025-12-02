@@ -33,8 +33,8 @@ public class ProductServiceImpl implements ProductService {
     private final UserRepository userRepo;
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
-
-    @Value("${app.upload.dir:${user.home}/quitq-uploads}")
+    // Read APP_UPLOAD_DIR env var (container-friendly). Default to /opt/quitq/uploads.
+    @Value("${app.upload.dir:/opt/quitq/uploads}")
     private String uploadDir;
 
     @Autowired
@@ -112,7 +112,9 @@ public class ProductServiceImpl implements ProductService {
         }
 
         String contentType = file.getContentType() != null ? file.getContentType() : "";
-        if (!(contentType.equals("image/png") || contentType.equals("image/jpeg") || contentType.equals("image/jpg"))) {
+        if (!(contentType.equalsIgnoreCase("image/png") ||
+              contentType.equalsIgnoreCase("image/jpeg") ||
+              contentType.equalsIgnoreCase("image/jpg"))) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PNG/JPEG images allowed");
         }
 

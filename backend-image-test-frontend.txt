@@ -1,0 +1,53 @@
+﻿curl.exe : * Host localhost:3000 was resolved.
+At line:2 char:1
++ curl.exe -v http://localhost:3000/api/v1/seller/products/6/image 2>&1 ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (* Host localhost:3000 was resolved.:Strin 
+   g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   
+Trying [::1]:3000...
+* Established connection to localhost (::1 port 3000) from ::1 port 56006 
+* using HTTP/1.x
+> GET /api/v1/seller/products/6/image HTTP/1.1
+
+> Host: localhost:3000
+
+> User-Agent: curl/8.16.0
+
+> Accept: */*
+
+> 
+
+* Request completely sent off
+< HTTP/1.1 502 Bad Gateway
+
+< Server: nginx/1.28.0
+
+< Date: Tue, 02 Dec 2025 00:07:42 GMT
+
+< Content-Type: text/html
+
+< Content-Length: 157
+
+< Connection: keep-alive
+
+< 
+
+{ [157 bytes data]
+
+100   157  100   157    0     0  14103      0 --:--:-- --:--:-- --:--:-- 14272
+* Connection #0 to host localhost:3000 left intact
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.28.0</center>
+</body>
+</html>
